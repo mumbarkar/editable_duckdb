@@ -7,10 +7,13 @@ Description: A lightweight table viewer package.
 License: MIT + file LICENSE
 Imports: 
     config,
-    golem,
+    DBI,
+    duckdb,
     pkgload,
+    R6,
     shiny
 Suggests: 
+    golem,
     testthat (>= 3.0.0)
 Config/testthat/edition: 3
 Encoding: UTF-8
