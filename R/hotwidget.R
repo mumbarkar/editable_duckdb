@@ -1,25 +1,36 @@
-#' <Add Title>
+#' hotwidget htmlwidget wrapper
 #'
-#' <Add Description>
-#'
+#' @param data A data.frame to render in the widget (or `message` for backwards compatibility).
+#' @param width,height Widget width/height.
+#' @param options List of widget options (colClasses, readOnly, etc).
 #' @import htmlwidgets
-#'
 #' @export
-hotwidget <- function(message, width = NULL, height = NULL, elementId = NULL) {
+hotwidget <- function(data = NULL, message = NULL, width = NULL, height = NULL, options = list()) {
+  # Backwards compatibility: accept `message` as data
+  if (is.null(data) && !is.null(message)) data <- message
 
-  # forward options using x
-  x = list(
-    message = message
+  if (is.null(data)) data <- data.frame()
+
+  # Ensure data is a data.frame
+  data <- as.data.frame(data, stringsAsFactors = FALSE)
+
+  # Build metadata for JS (column names + classes)
+  col_classes <- vapply(data, function(col) paste(class(col), collapse = ","), character(1))
+  x <- list(
+    data = unname(as.list(data)), # list of columns; JS will reconstruct rows
+    nrow = nrow(data),
+    ncol = ncol(data),
+    colnames = colnames(data),
+    colclasses = as.character(col_classes),
+    options = options
   )
 
-  # create widget
   htmlwidgets::createWidget(
-    name = 'hotwidget',
-    x,
+    name = "hotwidget",
+    x = x,
     width = width,
     height = height,
-    package = 'atorus.takehome',
-    elementId = elementId
+    package = "atorus.takehome"
   )
 }
 
