@@ -35,7 +35,13 @@ HTMLWidgets.widget({
       var ncol = x.ncol || cols.length;
       var nrow = x.nrow || (cols && cols[0] ? cols[0].length : 0);
       var rows = [];
-      for (var r = 0; r < nrow; r++) {
+      
+      // Handle pagination: extract start_row and rows_to_show from x
+      var startRow = (x.start_row !== undefined) ? parseInt(x.start_row, 10) : 0;
+      var rowsToShow = (x.rows_to_show !== undefined) ? parseInt(x.rows_to_show, 10) : nrow;
+      var endRow = Math.min(startRow + rowsToShow, nrow);
+      
+      for (var r = startRow; r < endRow; r++) {
         var row = new Array(ncol);
         for (var c = 0; c < ncol; c++) {
           var col = cols[c] || [];
@@ -54,12 +60,16 @@ HTMLWidgets.widget({
       var oldVal = change[2];
       var newVal = change[3];
 
+      // Account for pagination offset: displayed row index + pagination start offset
+      var paginationOffset = (x.start_row !== undefined) ? parseInt(x.start_row, 10) : 0;
+      var actualRow = row0 + paginationOffset;
+
       // prop is column index when data is array-of-arrays
       var colIndex = (typeof prop === 'number') ? prop : parseInt(prop, 10);
       if (isNaN(colIndex)) colIndex = 0;
 
       var payload = {
-        row: row0 + 1,
+        row: actualRow + 1,
         col: colIndex + 1,
         colname: (x.colnames && x.colnames[colIndex]) ? x.colnames[colIndex] : null,
         oldValue: oldVal,
@@ -82,7 +92,7 @@ HTMLWidgets.widget({
           colHeaders: x.colnames || undefined,
           columns: colsFromX(x),
           licenseKey: 'non-commercial-and-evaluation',
-          rowHeaders: true,
+          rowHeaders: false,
           stretchH: 'all',
           manualColumnResize: true,
           contextMenu: true,

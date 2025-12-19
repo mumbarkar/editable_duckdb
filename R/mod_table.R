@@ -22,7 +22,7 @@ confirm_modal <- function(session, id, title, message, confirm_id,
       actionButton(
         ns(paste0(id, "_", confirm_id)),
         confirm_label,
-        class = if (danger) "btn-danger" else "btn-primary"
+        class = if (danger) "btn-danger" else "btn-success"
       )
     ),
     easyClose = FALSE
@@ -85,7 +85,7 @@ mod_table_ui <- function(id) {
           ns("save_btn"),
           "Save Changes",
           icon = icon("save"),
-          class = "btn-outline-secondary",
+          class = "btn-outline-secondar",
           style = "border-radius: 8px; padding: 8px 20px;"
         ),
         actionButton(
@@ -106,18 +106,66 @@ mod_table_ui <- function(id) {
           class = "shadow-sm",
           style = "border-radius: 12px;",
           bslib::card_header(
-            h5("Data Table", class = "mb-0 fw-bold")
+            div(
+              class = "d-flex justify-content-between align-items-center",
+              h5("Data Table", class = "mb-0 fw-bold"),
+              downloadButton(
+                ns("download_btn"),
+                label = "Download Data",
+                class = "btn-sm btn-outline-primary",
+                style = "padding: 6px 12px; border-radius: 6px;"
+              )
+            )
           ),
           bslib::card_body(
-            style = "padding: 0;",
+            style = "padding: 12px;",
+            # Rows per page selector
             div(
-              class = "table-container",
+              class = "mb-2 d-flex gap-2 align-items-center",
+              style = "font-size: 0.9rem;",
+              selectInput(
+                ns("rows_per_page"),
+                label = NULL,
+                choices = c(10, 25, 50, 100),
+                selected = 10,
+                width = "70px"
+              ),
+              span("rows per page")
+            ),
+            # Table container
+            div(
+              class = "table-container mb-2",
               style = "
-                min-height:600px;
+                height: 550px;
+                overflow-y: auto;
+                overflow-x: auto;
                 border: 1px solid #e6e6e6;
                 border-radius: 8px;
                 padding: 12px;",
               hotwidgetOutput(ns("table"), width = '100%', height = '100%')
+            ),
+            # Page navigation at bottom right
+            div(
+              class = "d-flex justify-content-end gap-2 align-items-center",
+              style = "font-size: 0.9rem;",
+              actionButton(
+                ns("prev_page"),
+                label = "",
+                icon = icon("chevron-left"),
+                class = "btn-sm",
+                style = "padding: 4px 8px;"
+              ),
+              span(
+                textOutput(ns("page_info"), inline = TRUE),
+                style = "min-width: 70px; text-align: center;"
+              ),
+              actionButton(
+                ns("next_page"),
+                label = "",
+                icon = icon("chevron-right"),
+                class = "btn-sm",
+                style = "padding: 4px 8px;"
+              )
             )
           )
         ),
@@ -160,9 +208,66 @@ mod_table_server <- function(id, store) {
     last_edit <- reactiveVal(NULL)
     edit_count <- reactiveVal(0)
     pending_action <- shiny::reactiveVal(NULL)
+    
+    # Pagination state
+    current_page <- reactiveVal(1)
+    rows_per_page <- reactive(as.integer(input$rows_per_page))
+    
+    # Calculate pagination parameters
+    total_rows <- reactive(nrow(rv_data()))
+    total_pages <- reactive(ceiling(total_rows() / rows_per_page()))
+    start_row <- reactive((current_page() - 1) * rows_per_page())
+    end_row <- reactive(min(start_row() + rows_per_page(), total_rows()))
+    
+    # Get paginated data for display
+    paginated_data <- reactive({
+      df <- rv_data()
+      start <- start_row() + 1  # 1-indexed
+      end <- end_row()
+      if (start <= nrow(df)) {
+        df[start:end, ]
+      } else {
+        df[numeric(0), ]
+      }
+    })
 
     output$table <- renderHotwidget({
-      hotwidget(rv_data(), options = list())
+      hotwidget(
+        paginated_data(),
+        options = list(
+          start_row = start_row(),
+          rows_to_show = rows_per_page()
+        )
+      )
+    })
+    
+    # Pagination display
+    output$page_info <- renderText({
+      if (total_rows() == 0) {
+        "No data"
+      } else {
+        paste0("Page ", current_page(), " of ", total_pages())
+      }
+    })
+    
+    # Previous page button
+    observeEvent(input$prev_page, {
+      if (current_page() > 1) {
+        current_page(current_page() - 1)
+      }
+    })
+    
+    # Next page button
+    observeEvent(input$next_page, {
+      if (current_page() < total_pages()) {
+        current_page(current_page() + 1)
+      }
+    })
+    
+    # Reset to page 1 when data changes
+    observe({
+      rv_data()  # dependency
+      current_page(1)
     })
 
     # handle single-cell edits coming from the hotwidget JS
@@ -211,7 +316,7 @@ mod_table_server <- function(id, store) {
           message = "Do you want to save changes to DuckDB?",
           confirm_id = "confirm",
           confirm_label = "Save",
-          danger = TRUE
+          danger = FALSE
         )
       )
     })
@@ -278,6 +383,16 @@ mod_table_server <- function(id, store) {
       if (is.null(ed)) ""
       else paste0("Last edit: row=", ed$row, " col=", ed$col, " val=", ed$value)
     })
+
+    # ---- DOWNLOAD BUTTON ----
+    output$download_btn <- downloadHandler(
+      filename = function() {
+        paste0("mtcars_", format(Sys.time(), "%Y%m%d_%H%M%S"), ".csv")
+      },
+      content = function(file) {
+        write.csv(rv_data(), file, row.names = FALSE)
+      }
+    )
 
     return(list(data = rv_data, last_edit = last_edit, edit_count = edit_count))
   })
