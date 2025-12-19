@@ -85,7 +85,7 @@ mod_table_ui <- function(id) {
           ns("save_btn"),
           "Save Changes",
           icon = icon("save"),
-          class = "btn-outline-secondar",
+          class = "btn-outline-secondary",
           style = "border-radius: 8px; padding: 8px 20px;"
         ),
         actionButton(
@@ -140,7 +140,7 @@ mod_table_ui <- function(id) {
                 overflow-y: auto;
                 overflow-x: auto;
                 border: 1px solid #e6e6e6;
-                border-radius: 8px;
+                border-radius: 12px;
                 padding: 12px;",
               hotwidgetOutput(ns("table"), width = '100%', height = '100%')
             ),
