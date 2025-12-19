@@ -1,51 +1,132 @@
 #' The application User-Interface
 #'
 #' @param request Internal parameter for `{shiny}`.
-#'     DO NOT REMOVE.
 #' @import shiny
-#' @import DT
+#' @import bslib
 #' @noRd
 app_ui <- function(request) {
-  shiny::tagList(
+  tagList(
+    # Leave this function for adding external resources
     golem_add_external_resources(),
-    shiny::titlePanel("Data Explorer"),
-    # Top header / hero area (wireframe)
-    shiny::div(
-      class = "app-header",
-      shiny::tags$div(
-        class = "container-fluid",
-        shiny::tags$h1("MTCars Dataset", style = "margin-top:10px; margin-bottom:0;"),
-        shiny::tags$p("Interactive data table with real-time editing", style = "margin-top:0; color: #555;")
+
+    # Application UI
+    bslib::page_navbar(
+      title = "Data Explorer",
+
+      bslib::nav_spacer(),
+
+      theme = bslib::bs_theme(
+        version = 5,
+        bg = "#ffffff",
+        fg = "#333333",
+        primary = "#0066cc",
+        base_font = font_google("Inter"),
+        font_scale = 0.9
       ),
-      style = "padding: 12px 16px; background: #f8f9fb;"
-    ),
-    shiny::mainPanel(
-      mod_table_ui("table")
+
+      # Navigation items
+      bslib::nav_panel(
+        title = "Home",
+        mod_table_ui("table")
+      ),
+
+      # Analytics tab
+      bslib::nav_panel(
+        title = "Analytics",
+        div(
+          class = "container-fluid py-4",
+          h3("Analytics Dashboard"),
+          p("Analytics features coming soon...", class = "text-muted")
+        )
+      ),
+
+      # Settings tab
+      bslib::nav_panel(
+        title = "Settings",
+        div(
+          class = "container-fluid py-4",
+          h3("Settings"),
+          p("Application settings coming soon...", class = "text-muted")
+        )
+      )
     )
   )
 }
 
 #' Add external Resources to the Application
 #'
-#' This function is internally used to add external
-#' resources inside the Shiny application.
-#'
 #' @import shiny
 #' @importFrom golem add_resource_path activate_js favicon bundle_resources
 #' @noRd
 golem_add_external_resources <- function() {
   add_resource_path(
-    "www",
-    app_sys("app/www")
+    'www',
+    app_sys('app/www')
   )
 
   tags$head(
     favicon(),
     bundle_resources(
-      path = app_sys("app/www"),
-      app_title = "atorus.takehome"
-    )
-    # Add here other external resources
-    # for example, you can add shinyalert::useShinyalert()
+      path = app_sys('app/www'),
+      app_title = 'atorus.takehome'
+    ),
+    # Add Handsontable CSS
+    tags$link(
+      rel = "stylesheet",
+      href = "https://cdn.jsdelivr.net/npm/handsontable@12.3.1/dist/handsontable.full.min.css"
+    ),
+    # Add Handsontable JS
+    tags$script(
+      src = "https://cdn.jsdelivr.net/npm/handsontable@12.3.1/dist/handsontable.full.min.js"
+    ),
+    # Custom CSS for additional styling
+    tags$style(HTML("
+      .navbar-brand {
+        font-weight: 600;
+        font-size: 1.1rem;
+      }
+
+      .nav-link {
+        font-weight: 500;
+      }
+
+      .btn-outline-secondary {
+        border: 1px solid #dee2e6;
+        color: #495057;
+      }
+
+      .btn-outline-secondary:hover {
+        background-color: #f8f9fa;
+        border-color: #dee2e6;
+        color: #495057;
+      }
+
+      .btn-outline-danger {
+        border: 1px solid #dc3545;
+        color: #dc3545;
+      }
+
+      .btn-outline-danger:hover {
+        background-color: #dc3545;
+        border-color: #dc3545;
+        color: white;
+      }
+
+      .card {
+        border: 1px solid #e9ecef;
+      }
+
+      .card-header {
+        padding: 1rem 1.25rem;
+      }
+
+      .card-body {
+        padding: 1.25rem;
+      }
+
+      .bg-light {
+        background-color: #f8f9fa !important;
+      }
+    "))
   )
 }

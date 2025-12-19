@@ -1,88 +1,145 @@
-#' Module UI for editable table
+#' Create a reusable modal helper
+#'
+#' @param id ID
+#' @param title Title of the modal
+#' @param message Modal message
+#' @param confirm_label Confirmation Label
+#'
+#' @returns A modal dialogue box
+#' @export
+#'
+#' @examples
+confirm_modal <- function(session, id, title, message, confirm_id,
+                          confirm_label = "Confirm", danger = FALSE) {
+
+  ns <- session$ns
+
+  modalDialog(
+    title = title,
+    message,
+    footer = tagList(
+      modalButton("Cancel"),
+      actionButton(
+        ns(paste0(id, "_", confirm_id)),
+        confirm_label,
+        class = if (danger) "btn-danger" else "btn-primary"
+      )
+    ),
+    easyClose = FALSE
+  )
+}
+
+
+# ===============================
+# Helper: Summary block UI
+# ===============================
+summary_block <- function(ns, title, value_ui) {
+  div(
+    class = "mb-2 p-2 bg-light rounded",
+    style = "border: 0.5px solid #e3e6ea;",
+    div(
+      class = "text-muted fw-semibold",
+      style = "
+        font-size: 0.7rem;
+        letter-spacing: 0.4px;
+        margin-bottom: 2px;",
+      title
+    ),
+    div(
+      style = "
+        font-size: 1.3rem;
+        font-weight: 600;
+        line-height: 1.2;",
+      value_ui
+    )
+  )
+}
+
+
+#' Module UI for Home / Editable table
 #' @param id module id
 #' @export
 mod_table_ui <- function(id) {
   ns <- shiny::NS(id)
-  shiny::tagList(
-    # Bold styles for summary text
-    tags$style(HTML(
-      paste0(
-        "#", ns('record_count'), ", ",
-        "#", ns('column_count'), ", ",
-        "#", ns('avg_mpg'), ", ",
-        "#", ns('avg_hp'), ", ",
-        "#", ns('modified_cells'), " { font-weight:bold; font-size:1.5em; }"
-      )
-    )),
-    shiny::fluidPage(
-      shiny::fluidRow(
-        # Action buttons container
-        shiny::div(
-          style = "margin-bottom:12px; display:flex; justify-content:space-between;
-                     border: 0px solid #ddd; border-radius: 8px; padding: 12px 16px; background: #fafafa;",
-          shiny::actionButton(ns("save_btn"), "Save Changes", icon = shiny::icon("save"), class = "btn-primary"),
-          shiny::actionButton(ns("revert_btn"), "Revert Changes", icon = shiny::icon("undo"), class = "btn-warning")
+
+  tagList(
+    div(
+      class = "container-fluid py-4",
+      style = "max-width: 1400px; margin: 0 auto;",
+
+      # ---- HEADER ----
+      div(
+        class = "mb-4",
+        h2("MTCars Dataset", class = "mb-2"),
+        p(
+          "Interactive data table with real-time editing",
+          class = "text-muted",
+          style = "font-size: 1.1rem;"
+        )
+      ),
+
+      # ---- ACTION BUTTONS ----
+      div(
+        class = "d-flex justify-content-between mb-4",
+        actionButton(
+          ns("save_btn"),
+          "Save Changes",
+          icon = icon("save"),
+          class = "btn-outline-secondary",
+          style = "border-radius: 8px; padding: 8px 20px;"
         ),
-        # Left side (table)
-        shiny::column(
-          width = 9,
-          # Table container with border
-          shiny::div(
-            class = "table-container",
-            style = "min-height:600px; border: 1px solid #ddd; border-radius: 8px; padding: 12px;",
-            shiny::h3("Data Table", style = "margin:0 0 10px 0;"),
-            DT::DTOutput(ns("table"))
+        actionButton(
+          ns("revert_btn"),
+          "Revert Changes",
+          icon = icon("rotate-left"),
+          class = "btn-outline-danger",
+          style = "border-radius: 8px; padding: 8px 20px;"
+        )
+      ),
+
+      # ---- MAIN LAYOUT ----
+      bslib::layout_columns(
+        col_widths = c(8, 4),
+
+        # ===== LEFT: TABLE =====
+        bslib::card(
+          class = "shadow-sm",
+          style = "border-radius: 12px;",
+          bslib::card_header(
+            h5("Data Table", class = "mb-0 fw-bold")
+          ),
+          bslib::card_body(
+            style = "padding: 0;",
+            div(
+              class = "table-container",
+              style = "
+                min-height:600px;
+                border: 1px solid #e6e6e6;
+                border-radius: 8px;
+                padding: 12px;",
+              DT::DTOutput(ns("table"))
+            )
           )
         ),
 
-        # Right side (summary)
-        shiny::column(
-          width = 3,
-          shiny::div(
-            style = "border: 1px solid #ccc; border-radius:8px; padding: 16px; background:#fdfdfd; min-height:600px;",
-            shiny::h3("Summary", style = "margin:0 0 10px 0;"),
+        # ===== RIGHT: SUMMARY =====
+        bslib::card(
+          class = "shadow-sm",
+          style = "border-radius: 12px;",
+          bslib::card_header(
+            h5("Summary", class = "mb-0 fw-bold")
+          ),
+          bslib::card_body(
 
-            # Inner cards
-            shiny::div(
-              style = "display:flex; flex-direction:column; gap:12px;",
-              shiny::div(
-                style = "border: 1px solid #ddd; border-radius: 8px; padding: 12px; background: #fff;",
-                shiny::h5("Records", style = "margin:0 0 5px 0;"),
-                shiny::textOutput(ns("record_count"))
-              ),
+            summary_block(ns, "Records", textOutput(ns("record_count"), inline = TRUE)),
+            summary_block(ns, "Columns", textOutput(ns("column_count"), inline = TRUE)),
+            summary_block(ns, "Avg MPG", textOutput(ns("avg_mpg"), inline = TRUE)),
+            summary_block(ns, "Avg HP", textOutput(ns("avg_hp"), inline = TRUE)),
+            summary_block(ns, "Modified", textOutput(ns("modified_cells"), inline = TRUE)),
 
-              # Columns
-              shiny::div(
-                style = "border: 1px solid #ddd; border-radius: 8px; padding: 12px; background: #fff;",
-                shiny::h5("Columns", style = "margin:0 0 5px 0;"),
-                shiny::textOutput(ns("column_count"))
-              ),
-
-              # Avg MPG
-              shiny::div(
-                style = "border: 1px solid #ddd; border-radius: 8px; padding: 12px; background: #fff;",
-                shiny::h5("Average MPG", style = "margin:0 0 5px 0;"),
-                shiny::textOutput(ns("avg_mpg"))
-              ),
-
-              # Avg HP
-              shiny::div(
-                style = "border: 1px solid #ddd; border-radius: 8px; padding: 12px; background: #fff;",
-                shiny::h5("Average HP", style = "margin:0 0 5px 0;"),
-                shiny::textOutput(ns("avg_hp"))
-              ),
-
-              # Modified cells
-              shiny::div(
-                style = "border: 1px solid #ddd; border-radius: 8px; padding: 12px; background: #fff;",
-                shiny::h5("Modified", style = "margin:0 0 5px 0;"),
-                shiny::textOutput(ns("modified_cells"))
-              ),
-
-              # Status message
-              shiny::div(style = "margin-top:8px;",
-                         shiny::verbatimTextOutput(ns("status_message"), placeholder = TRUE)
-              )
+            div(
+              class = "mt-3",
+              verbatimTextOutput(ns("status_message"), placeholder = TRUE)
             )
           )
         )
@@ -90,6 +147,7 @@ mod_table_ui <- function(id) {
     )
   )
 }
+
 
 
 #' Module server for editable table
@@ -101,6 +159,7 @@ mod_table_server <- function(id, store) {
     rv_data <- reactiveVal(store$data)
     last_edit <- reactiveVal(NULL)
     edit_count <- reactiveVal(0)
+    pending_action <- shiny::reactiveVal(NULL)
 
     output$table <- DT::renderDT({
       DT::datatable(rv_data(), editable = "cell", options = list(pageLength = 10))
@@ -124,22 +183,64 @@ mod_table_server <- function(id, store) {
       DT::replaceData(proxy, df, resetPaging = FALSE)
     })
 
-    observeEvent(input$revert_btn, {
-      rv_data(store$original)
-      edit_count(0)
-      last_edit(NULL)
-      DT::replaceData(proxy, store$original, resetPaging = TRUE)
+    # ---- SAVE BUTTON ----
+    observeEvent(input$save_btn, {
+      # pending_action("save")
+
+      shiny::showModal(
+        confirm_modal(
+          session = session,
+          id = "save",
+          title = "Confirm Save?",
+          message = "Do you want to save changes to DuckDB?",
+          confirm_id = "confirm",
+          confirm_label = "Save",
+          danger = TRUE
+        )
+      )
     })
 
-    observeEvent(input$save_btn, {
-      store$data <- rv_data()
-      # Write back to DuckDB
-      tryCatch({
-        store$save_to_db()
-        showNotification("Saved to database!", type = "message")
-      }, error = function(e) {
-        showNotification("Save failed.", type = "error")
+    # ---- REVERT BUTTON ----
+    observeEvent(input$revert_btn, {
+      # pending_action("revert")
+
+      shiny::showModal(
+        confirm_modal(
+          session = session,
+          id = "revert",
+          title = "Revert changes?",
+          message = "This will discard all changes. Continue?",
+          confirm_id = "confirm",
+          confirm_label = "Revert",
+          danger = TRUE
+        )
+      )
+    })
+    # observe({
+    #   print(names(input))
+    # })
+    # ---- CONFIRM HANDLER ----
+    observeEvent(input$save_confirm, {
+      shiny::removeModal()
+        tryCatch({
+          store$data <- rv_data()
+          store$save_to_db()
+          shiny::showNotification("✅ Saved successfully!", type = "message")
+        }, error = function(e) {
+          shiny::showNotification(
+            paste("❌ Save failed:", e$message),
+            type = "error"
+          )
+        })
       })
+
+    observeEvent(input$revert_confirm, {
+      removeModal()
+      edit_count(0)
+      last_edit(NULL)
+      rv_data(store$original)
+      DT::replaceData(proxy, store$original, resetPaging = TRUE)
+      shiny::showNotification("↩ Changes reverted.", type = "warning")
     })
 
     output$record_count <- renderText(paste(nrow(rv_data())))

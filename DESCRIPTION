@@ -12,11 +12,12 @@ Imports:
     DT,
     pkgload,
     R6,
-    shiny
+    shiny,
+    bslib
 Suggests: 
     golem,
     testthat (>= 3.0.0)
 Config/testthat/edition: 3
 Encoding: UTF-8
 LazyData: true
-RoxygenNote: 7.3.2
+RoxygenNote: 7.3.3

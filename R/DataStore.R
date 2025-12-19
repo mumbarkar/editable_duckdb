@@ -14,7 +14,17 @@ DataStore <- R6::R6Class(
     original = NULL,
     tbl_name = NULL,
 
-    initialize = function(db_path = NULL, table = "mtcars", read_only = TRUE) {
+#' Title
+#'
+#' @param db_path
+#' @param table
+#' @param read_only
+#'
+#' @returns
+#' @export
+#'
+#' @examples
+initialize = function(db_path = NULL, table = "mtcars", read_only = TRUE) {
       db_file <- if (is.null(db_path)) {
         system.file("extdata", "mtcars.duckdb", package = "atorus.takehome")
       } else {
@@ -48,7 +58,13 @@ DataStore <- R6::R6Class(
       self$original <- as.data.frame(df, stringsAsFactors = FALSE)
     },
 
-    save_to_db = function() {
+#' Title
+#'
+#' @returns
+#' @export
+#'
+#' @examples
+save_to_db = function() {
       if (is.null(self$con)) {
         stop("No DB connection to write to.")
       }
@@ -59,20 +75,38 @@ DataStore <- R6::R6Class(
       invisible(TRUE)
     },
 
-    # Method to update a single cell
-    update_cell = function(row, col, value) {
+#' Method to update a single cell
+#'
+#' @param row
+#' @param col
+#' @param value
+#'
+#' @returns
+#' @export
+#'
+#' @examples
+update_cell = function(row, col, value) {
       self$data[row, col] <- value
       invisible(TRUE)
     },
 
-    # Method to revert back to original data
-    save_snapshot = function() {
+#' Method to revert back to original data
+#'
+#' @returns
+#' @export
+#'
+#' @examples
+save_snapshot = function() {
       self$original <- self$data
       invisible(TRUE)
     },
 
-    # Method to generate simple summary
-    summary = function() {
+#' Method to generate simple summary#'
+#' @returns
+#' @export
+#'
+#' @examples
+summary = function() {
       if (is.null(self$data)) return("No data loaded")
       list(
         rows = nrow(self$data),
@@ -81,17 +115,30 @@ DataStore <- R6::R6Class(
         )
       },
 
-    disconnect = function() {
+#' Method for DB disconnect
+#'
+#' @returns
+#' @export
+#'
+#' @examples
+disconnect = function() {
       if (!is.null(self$con)) {
         try(DBI::dbDisconnect(self$con, shutdown = TRUE), silent = TRUE)
         self$con <- NULL
       }
       invisible(TRUE)
-    },
-
-    finalize = function() {
-      self$disconnect()
     }
-  )
+  ),
+private = list(
+  #' Finalize method
+  #'
+  #' @returns
+  #' @export
+  #'
+  #' @examples
+  finalize = function() {
+    self$disconnect()
+  }
+)
 )
 
