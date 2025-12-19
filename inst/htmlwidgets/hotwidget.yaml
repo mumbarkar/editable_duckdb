@@ -1,22 +1,10 @@
 dependencies:
- - name: dompurify
-   version: 3.0.6
-   src: htmlwidgets/libs/dompurify
-   script: purify.min.js
- - name: moment
-   version: 2.29.4
-   src: htmlwidgets/libs/moment
-   script: moment.min.js
- - name: pikaday
-   version: 1.8.0
-   src: htmlwidgets/libs/pikaday
-   script: pikaday.min.js
  - name: numbro
    version: 2.4.0
    src: htmlwidgets/libs/numbro
-   script: numbro.min.js
+   script: languages.min.js
  - name: handsontable
    version: 16.1.1
    src: htmlwidgets/libs/handsontable
-   script: handsontable.min.js
-   stylesheet: handsontable.css
+   script: handsontable.full.min.js
+   stylesheet: handsontable.full.min.css
