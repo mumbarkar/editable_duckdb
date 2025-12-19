@@ -1,6 +1,10 @@
 dependencies:
+ - name: numbro
+   version: 2.4.0
+   src: htmlwidgets/libs/numbro
+   script: languages.min.js
  - name: handsontable
    version: 16.1.1
    src: htmlwidgets/libs/handsontable
-   script: handsontable.min.js
-   stylesheet: handsontable.css
+   script: handsontable.full.min.js
+   stylesheet: handsontable.full.min.css
