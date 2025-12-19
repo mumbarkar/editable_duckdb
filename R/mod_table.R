@@ -117,7 +117,7 @@ mod_table_ui <- function(id) {
                 border: 1px solid #e6e6e6;
                 border-radius: 8px;
                 padding: 12px;",
-              DT::DTOutput(ns("table"))
+              hotwidgetOutput(ns("table"), width = '100%', height = '100%')
             )
           )
         ),
@@ -161,26 +161,42 @@ mod_table_server <- function(id, store) {
     edit_count <- reactiveVal(0)
     pending_action <- shiny::reactiveVal(NULL)
 
-    output$table <- DT::renderDT({
-      DT::datatable(rv_data(), editable = "cell", options = list(pageLength = 10))
+    output$table <- renderHotwidget({
+      hotwidget(rv_data(), options = list())
     })
 
-    proxy <- DT::dataTableProxy(session$ns("table"))
-
+    # handle single-cell edits coming from the hotwidget JS
     observeEvent(input$table_cell_edit, {
       info <- input$table_cell_edit
-      row <- info$row
-      col <- info$col
-      new_val <- DT::coerceValue(info$value, rv_data()[row, col])
+      row <- as.integer(info$row)
+      col <- as.integer(info$col)
+      new_raw <- info$value
 
-      df <- rv_data()
-      df[row, col] <- new_val
-      rv_data(df)
+      # conservative server-side coercion based on current column class
+      coerce_value <- function(val, col_idx) {
+        if (is.null(val)) return(NA)
+        cls <- class(store$data[[col_idx]])
+        if (any(cls %in% c("numeric", "integer"))) {
+          v <- suppressWarnings(as.numeric(val))
+          if (is.na(v) && !is.na(val) && nzchar(as.character(val))) return(NA_real_)
+          return(v)
+        }
+        if (any(cls %in% c("logical"))) {
+          return(as.logical(val))
+        }
+        # default to character
+        return(as.character(val))
+      }
 
-      last_edit(list(row = row, col = col, value = new_val))
-      edit_count(edit_count() + 1)
+      coerced <- tryCatch(coerce_value(new_raw, col), error = function(e) new_raw)
 
-      DT::replaceData(proxy, df, resetPaging = FALSE)
+      # apply to DataStore and update reactive view
+      try({
+        store$update_cell(row, col, coerced)
+        rv_data(store$data)
+        last_edit(list(row = row, col = col, value = coerced))
+        edit_count(edit_count() + 1)
+      }, silent = TRUE)
     })
 
     # ---- SAVE BUTTON ----
@@ -239,7 +255,7 @@ mod_table_server <- function(id, store) {
       edit_count(0)
       last_edit(NULL)
       rv_data(store$original)
-      DT::replaceData(proxy, store$original, resetPaging = TRUE)
+      # hotwidget will re-render from rv_data(); show notification
       shiny::showNotification("↩ Changes reverted.", type = "warning")
     })
 

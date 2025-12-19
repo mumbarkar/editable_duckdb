@@ -4,7 +4,7 @@ app_server <- function(input, output, session) {
 
   store <- DataStore$new()
 
-  table_mod <- mod_table_server("table", store)
+  table_mod <- mod_table_server("table_edit", store)
 
   # Listening to edits (increment behavior)
   shiny::observeEvent(table_mod$last_edit(), {

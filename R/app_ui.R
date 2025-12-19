@@ -27,7 +27,7 @@ app_ui <- function(request) {
       # Navigation items
       bslib::nav_panel(
         title = "Home",
-        mod_table_ui("table")
+        mod_table_ui("table_edit")
       ),
 
       # Analytics tab
@@ -70,15 +70,7 @@ golem_add_external_resources <- function() {
       path = app_sys('app/www'),
       app_title = 'atorus.takehome'
     ),
-    # Add Handsontable CSS
-    tags$link(
-      rel = "stylesheet",
-      href = "https://cdn.jsdelivr.net/npm/handsontable@12.3.1/dist/handsontable.full.min.css"
-    ),
-    # Add Handsontable JS
-    tags$script(
-      src = "https://cdn.jsdelivr.net/npm/handsontable@12.3.1/dist/handsontable.full.min.js"
-    ),
+    # Handsontable is provided by the bundled htmlwidget dependency
     # Custom CSS for additional styling
     tags$style(HTML("
       .navbar-brand {
