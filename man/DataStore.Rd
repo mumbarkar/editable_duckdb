@@ -10,13 +10,6 @@ expose data, original, update_cell, revert, and summary methods.
 \examples{
 
 ## ------------------------------------------------
-## Method `DataStore$new`
-## ------------------------------------------------
-
-Title
-
-
-## ------------------------------------------------
 ## Method `DataStore$save_to_db`
 ## ------------------------------------------------
 
@@ -77,15 +70,6 @@ Finalize method
 }
 \if{html}{\out{</div>}}
 }
-\subsection{Examples}{
-\if{html}{\out{<div class="r example copy">}}
-\preformatted{Title
-
-}
-\if{html}{\out{</div>}}
-
-}
-
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-DataStore-save_to_db"></a>}}

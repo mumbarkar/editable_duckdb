@@ -14,8 +14,6 @@ DataStore <- R6::R6Class(
     original = NULL,
     tbl_name = NULL,
 
-#' Title
-#'
 #' @param db_path
 #' @param table
 #' @param read_only
@@ -58,8 +56,6 @@ initialize = function(db_path = NULL, table = "mtcars", read_only = TRUE) {
       self$original <- as.data.frame(df, stringsAsFactors = FALSE)
     },
 
-#' Title
-#'
 #' @returns
 #' @export
 #'
