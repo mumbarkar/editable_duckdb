@@ -172,6 +172,7 @@ mod_table_server <- function(id, store) {
 
     # Get paginated data for display ----
     paginated_data <- reactive({
+      shiny::validate(need(nrow(rv_data()) > 0, 'No data available.'))
       df <- rv_data()
       start <- start_row() + 1  # 1-indexed
       end <- end_row()
@@ -183,6 +184,8 @@ mod_table_server <- function(id, store) {
     })
 
     output$table <- renderHotwidget({
+      # Inline validation
+      shiny::validate(need(nrow(paginated_data()) > 0, 'No data available.'))
       hotwidget(
         paginated_data(),
         options = list(
@@ -194,6 +197,7 @@ mod_table_server <- function(id, store) {
 
     # Pagination display ----
     output$page_info <- renderText({
+      req(total_rows() != 0)
       if (total_rows() == 0) {
         "No data"
       } else {
