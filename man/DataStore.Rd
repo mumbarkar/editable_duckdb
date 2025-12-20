@@ -2,46 +2,13 @@
 % Please edit documentation in R/DataStore.R
 \name{DataStore}
 \alias{DataStore}
-\title{DataStore R6 class}
+\title{initialize}
 \description{
-an R6 class intended to connect to a bundled DuckDB DB (mtcars.duckdb) and
+An R6 class intended to connect to a bundled DuckDB DB (mtcars.duckdb) and
 expose data, original, update_cell, revert, and summary methods.
 }
-\examples{
-
-## ------------------------------------------------
-## Method `DataStore$save_to_db`
-## ------------------------------------------------
-
-Method to update a single cell
-
-
-## ------------------------------------------------
-## Method `DataStore$update_cell`
-## ------------------------------------------------
-
-Method to revert back to original data
-
-
-## ------------------------------------------------
-## Method `DataStore$save_snapshot`
-## ------------------------------------------------
-
-Method to generate simple summary#'
-
-## ------------------------------------------------
-## Method `DataStore$summary`
-## ------------------------------------------------
-
-Method for DB disconnect
-
-
-## ------------------------------------------------
-## Method `DataStore$disconnect`
-## ------------------------------------------------
-
-Finalize method
-
+\details{
+DataStore R6 class
 }
 \section{Methods}{
 \subsection{Public methods}{
@@ -66,7 +33,11 @@ Finalize method
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{read_only}}{}
+\item{\code{db_path}}{C character string of data base path}
+
+\item{\code{table}}{Character string of table name}
+
+\item{\code{read_only}}{Logical}
 }
 \if{html}{\out{</div>}}
 }
@@ -75,17 +46,9 @@ Finalize method
 \if{html}{\out{<a id="method-DataStore-save_to_db"></a>}}
 \if{latex}{\out{\hypertarget{method-DataStore-save_to_db}{}}}
 \subsection{Method \code{save_to_db()}}{
+Method to overwrite the data with most recent changes back to database
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{DataStore$save_to_db()}\if{html}{\out{</div>}}
-}
-
-\subsection{Examples}{
-\if{html}{\out{<div class="r example copy">}}
-\preformatted{Method to update a single cell
-
-}
-\if{html}{\out{</div>}}
-
 }
 
 }
@@ -93,6 +56,7 @@ Finalize method
 \if{html}{\out{<a id="method-DataStore-update_cell"></a>}}
 \if{latex}{\out{\hypertarget{method-DataStore-update_cell}{}}}
 \subsection{Method \code{update_cell()}}{
+Method to update a single cell
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{DataStore$update_cell(row, col, value)}\if{html}{\out{</div>}}
 }
@@ -104,30 +68,14 @@ Finalize method
 }
 \if{html}{\out{</div>}}
 }
-\subsection{Examples}{
-\if{html}{\out{<div class="r example copy">}}
-\preformatted{Method to revert back to original data
-
-}
-\if{html}{\out{</div>}}
-
-}
-
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-DataStore-save_snapshot"></a>}}
 \if{latex}{\out{\hypertarget{method-DataStore-save_snapshot}{}}}
 \subsection{Method \code{save_snapshot()}}{
+Method to revert back to original data
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{DataStore$save_snapshot()}\if{html}{\out{</div>}}
-}
-
-\subsection{Examples}{
-\if{html}{\out{<div class="r example copy">}}
-\preformatted{Method to generate simple summary#'
-}
-\if{html}{\out{</div>}}
-
 }
 
 }
@@ -135,17 +83,9 @@ Finalize method
 \if{html}{\out{<a id="method-DataStore-summary"></a>}}
 \if{latex}{\out{\hypertarget{method-DataStore-summary}{}}}
 \subsection{Method \code{summary()}}{
+Method to generate simple summary#'
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{DataStore$summary()}\if{html}{\out{</div>}}
-}
-
-\subsection{Examples}{
-\if{html}{\out{<div class="r example copy">}}
-\preformatted{Method for DB disconnect
-
-}
-\if{html}{\out{</div>}}
-
 }
 
 }
@@ -153,17 +93,9 @@ Finalize method
 \if{html}{\out{<a id="method-DataStore-disconnect"></a>}}
 \if{latex}{\out{\hypertarget{method-DataStore-disconnect}{}}}
 \subsection{Method \code{disconnect()}}{
+Method for DB disconnect
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{DataStore$disconnect()}\if{html}{\out{</div>}}
-}
-
-\subsection{Examples}{
-\if{html}{\out{<div class="r example copy">}}
-\preformatted{Finalize method
-
-}
-\if{html}{\out{</div>}}
-
 }
 
 }
