@@ -2,7 +2,7 @@
 % Please edit documentation in R/mod_table.R
 \name{mod_table_ui}
 \alias{mod_table_ui}
-\title{Module UI for Home / Editable table}
+\title{mod_table_ui}
 \usage{
 mod_table_ui(id)
 }

@@ -2,7 +2,7 @@
 % Please edit documentation in R/mod_table.R
 \name{mod_table_server}
 \alias{mod_table_server}
-\title{Module server for editable table}
+\title{mod_table_server}
 \usage{
 mod_table_server(id, store)
 }

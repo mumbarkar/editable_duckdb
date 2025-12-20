@@ -35,12 +35,12 @@ HTMLWidgets.widget({
       var ncol = x.ncol || cols.length;
       var nrow = x.nrow || (cols && cols[0] ? cols[0].length : 0);
       var rows = [];
-      
+
       // Handle pagination: extract start_row and rows_to_show from x
       var startRow = (x.start_row !== undefined) ? parseInt(x.start_row, 10) : 0;
       var rowsToShow = (x.rows_to_show !== undefined) ? parseInt(x.rows_to_show, 10) : nrow;
       var endRow = Math.min(startRow + rowsToShow, nrow);
-      
+
       for (var r = startRow; r < endRow; r++) {
         var row = new Array(ncol);
         for (var c = 0; c < ncol; c++) {
@@ -91,10 +91,19 @@ HTMLWidgets.widget({
           data: rowsFromX(x),
           colHeaders: x.colnames || undefined,
           columns: colsFromX(x),
+
           licenseKey: 'non-commercial-and-evaluation',
+
           rowHeaders: false,
+
+          width: '100%',
+          height: height || 420,
+
           stretchH: 'all',
+
+          autoColumnSize: true,
           manualColumnResize: true,
+
           contextMenu: true,
           theme: 'ht-master'
         };
@@ -113,17 +122,17 @@ HTMLWidgets.widget({
           // ensure container is empty
           el.innerHTML = '';
           hot = new Handsontable(el, Object.assign({}, settings, {
-            afterChange: function(changes /*, source */) {
+            afterChange: function(changes) {
               if (!changes) return;
-              for (var i = 0; i < changes.length; i++) {
-                try {
-                  sendEditToShiny(changes[i], x);
-                } catch (e) {
-                  console.error('hotwidget afterChange handler error', e);
-                }
-              }
+              changes.forEach(function(change) {
+                sendEditToShiny(change, x);
+              });
+            },
+            afterInit: function () {
+              this.refreshDimensions();
             }
           }));
+
         } else {
           // update data quickly
           if (typeof hot.loadData === 'function') {
@@ -139,11 +148,14 @@ HTMLWidgets.widget({
       },
 
       resize: function(width, height) {
-        if (hot && typeof hot.render === 'function') {
-          hot.render();
+        if (hot) {
+          hot.updateSettings({
+            width: width || '100%',
+            height: height || 'auto'
+          });
+          hot.refreshDimensions();
         }
       }
-
     };
   }
 });
