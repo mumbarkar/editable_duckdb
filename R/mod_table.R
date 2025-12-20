@@ -9,7 +9,7 @@ mod_table_ui <- function(id) {
   tagList(
     div(
       class = "container-fluid py-4",
-      style = "max-width: 1400px; margin: 0 auto;",
+      style = "max-width: 1400px; margin: 0 auto; background-color: #f5f5f7;",
 
       # Module header----
       div(
@@ -30,14 +30,14 @@ mod_table_ui <- function(id) {
           "Save Changes",
           icon = icon("save"),
           class = "btn-outline-secondary",
-          style = "border-radius: 8px; padding: 8px 20px;"
+          style = "border-radius: 8px; padding: 8px 20px; background-color: white;"
         ),
         actionButton(
           ns("revert_btn"),
           "Revert Changes",
           icon = icon("rotate-left"),
           class = "btn-outline-danger",
-          style = "border-radius: 8px; padding: 8px 20px;"
+          style = "border-radius: 8px; padding: 8px 20px; background-color: white;"
         )
       ),
 

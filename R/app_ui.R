@@ -21,7 +21,10 @@ app_ui <- function(request) {
         fg = "#333333",
         primary = "#0066cc",
         base_font = font_google("Inter"),
-        font_scale = 0.9
+        font_scale = 0.9,
+        success = 'green',
+        info = 'blue',
+        danger = 'red'
       ),
 
       # Navigation items
