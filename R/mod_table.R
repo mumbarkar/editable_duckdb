@@ -1,65 +1,9 @@
-#' Create a reusable modal helper
-#'
-#' @param id ID
-#' @param title Title of the modal
-#' @param message Modal message
-#' @param confirm_label Confirmation Label
-#'
-#' @returns A modal dialogue box
-#' @export
-#'
-#' @examples
-confirm_modal <- function(session, id, title, message, confirm_id,
-                          confirm_label = "Confirm", danger = FALSE) {
-
-  ns <- session$ns
-
-  modalDialog(
-    title = title,
-    message,
-    footer = tagList(
-      modalButton("Cancel"),
-      actionButton(
-        ns(paste0(id, "_", confirm_id)),
-        confirm_label,
-        class = if (danger) "btn-danger" else "btn-success"
-      )
-    ),
-    easyClose = FALSE
-  )
-}
-
-
-# ===============================
-# Helper: Summary block UI
-# ===============================
-summary_block <- function(ns, title, value_ui) {
-  div(
-    class = "mb-2 p-2 bg-light rounded",
-    style = "border: 0.5px solid #e3e6ea;",
-    div(
-      class = "text-muted fw-semibold",
-      style = "
-        font-size: 0.7rem;
-        letter-spacing: 0.4px;
-        margin-bottom: 2px;",
-      title
-    ),
-    div(
-      style = "
-        font-size: 1.3rem;
-        font-weight: 600;
-        line-height: 1.2;",
-      value_ui
-    )
-  )
-}
-
-
-#' Module UI for Home / Editable table
+#' @title mod_table_ui
+#' @description Module UI for Home / Editable table
 #' @param id module id
 #' @export
 mod_table_ui <- function(id) {
+
   ns <- shiny::NS(id)
 
   tagList(
@@ -67,7 +11,7 @@ mod_table_ui <- function(id) {
       class = "container-fluid py-4",
       style = "max-width: 1400px; margin: 0 auto;",
 
-      # ---- HEADER ----
+      # Module header----
       div(
         class = "mb-4",
         h2("MTCars Dataset", class = "mb-2"),
@@ -78,7 +22,7 @@ mod_table_ui <- function(id) {
         )
       ),
 
-      # ---- ACTION BUTTONS ----
+      # ACtion buttons ----
       div(
         class = "d-flex justify-content-between mb-4",
         actionButton(
@@ -97,7 +41,7 @@ mod_table_ui <- function(id) {
         )
       ),
 
-      # ---- MAIN LAYOUT ----
+      # Layout ----
       bslib::layout_columns(
         col_widths = c(8, 4),
 
@@ -170,7 +114,7 @@ mod_table_ui <- function(id) {
           )
         ),
 
-        # ===== RIGHT: SUMMARY =====
+        # Summary UI ----
         bslib::card(
           class = "shadow-sm",
           style = "border-radius: 12px;",
@@ -198,28 +142,35 @@ mod_table_ui <- function(id) {
 
 
 
-#' Module server for editable table
+#' @title mod_table_server
+#' @description Module server for editable table
 #' @param id module id
 #' @param store R6 DataStore instance
 #' @export
 mod_table_server <- function(id, store) {
   shiny::moduleServer(id, function(input, output, session) {
+
+    # Define reactive values ----
     rv_data <- reactiveVal(store$data)
     last_edit <- reactiveVal(NULL)
     edit_count <- reactiveVal(0)
     pending_action <- shiny::reactiveVal(NULL)
-    
-    # Pagination state
+    reset_edit_state <- function() {
+      edit_count(0)
+      last_edit(NULL)
+    }
+
+    # Pagination state ----
     current_page <- reactiveVal(1)
     rows_per_page <- reactive(as.integer(input$rows_per_page))
-    
-    # Calculate pagination parameters
+
+    # Calculate pagination parameters ----
     total_rows <- reactive(nrow(rv_data()))
     total_pages <- reactive(ceiling(total_rows() / rows_per_page()))
     start_row <- reactive((current_page() - 1) * rows_per_page())
     end_row <- reactive(min(start_row() + rows_per_page(), total_rows()))
-    
-    # Get paginated data for display
+
+    # Get paginated data for display ----
     paginated_data <- reactive({
       df <- rv_data()
       start <- start_row() + 1  # 1-indexed
@@ -240,8 +191,8 @@ mod_table_server <- function(id, store) {
         )
       )
     })
-    
-    # Pagination display
+
+    # Pagination display ----
     output$page_info <- renderText({
       if (total_rows() == 0) {
         "No data"
@@ -249,22 +200,22 @@ mod_table_server <- function(id, store) {
         paste0("Page ", current_page(), " of ", total_pages())
       }
     })
-    
-    # Previous page button
+
+    # Previous page button ----
     observeEvent(input$prev_page, {
       if (current_page() > 1) {
         current_page(current_page() - 1)
       }
     })
-    
-    # Next page button
+
+    # Next page button ----
     observeEvent(input$next_page, {
       if (current_page() < total_pages()) {
         current_page(current_page() + 1)
       }
     })
-    
-    # Reset to page 1 when data changes
+
+    # Reset to page 1 when data changes ----
     observe({
       rv_data()  # dependency
       current_page(1)
@@ -304,16 +255,15 @@ mod_table_server <- function(id, store) {
       }, silent = TRUE)
     })
 
-    # ---- SAVE BUTTON ----
+    # Save button ----
     observeEvent(input$save_btn, {
-      # pending_action("save")
 
       shiny::showModal(
         confirm_modal(
           session = session,
           id = "save",
           title = "Confirm Save?",
-          message = "Do you want to save changes to DuckDB?",
+          message = "Do you want to save changes to DuckDB? \nOnce you save changes to DuckDB, you can't revert it.",
           confirm_id = "confirm",
           confirm_label = "Save",
           danger = FALSE
@@ -321,9 +271,8 @@ mod_table_server <- function(id, store) {
       )
     })
 
-    # ---- REVERT BUTTON ----
+    # Revert Button ----
     observeEvent(input$revert_btn, {
-      # pending_action("revert")
 
       shiny::showModal(
         confirm_modal(
@@ -337,16 +286,15 @@ mod_table_server <- function(id, store) {
         )
       )
     })
-    # observe({
-    #   print(names(input))
-    # })
-    # ---- CONFIRM HANDLER ----
+
+    # Confirm Handler ----
     observeEvent(input$save_confirm, {
       shiny::removeModal()
         tryCatch({
           store$data <- rv_data()
           store$save_to_db()
           shiny::showNotification("✅ Saved successfully!", type = "message")
+          reset_edit_state()
         }, error = function(e) {
           shiny::showNotification(
             paste("❌ Save failed:", e$message),
@@ -357,9 +305,8 @@ mod_table_server <- function(id, store) {
 
     observeEvent(input$revert_confirm, {
       removeModal()
-      edit_count(0)
-      last_edit(NULL)
       rv_data(store$original)
+      reset_edit_state()
       # hotwidget will re-render from rv_data(); show notification
       shiny::showNotification("↩ Changes reverted.", type = "warning")
     })
@@ -384,7 +331,7 @@ mod_table_server <- function(id, store) {
       else paste0("Last edit: row=", ed$row, " col=", ed$col, " val=", ed$value)
     })
 
-    # ---- DOWNLOAD BUTTON ----
+    # Download button ----
     output$download_btn <- downloadHandler(
       filename = function() {
         paste0("mtcars_", format(Sys.time(), "%Y%m%d_%H%M%S"), ".csv")

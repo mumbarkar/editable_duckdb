@@ -27,7 +27,7 @@ app_ui <- function(request) {
       # Navigation items
       bslib::nav_panel(
         title = "Home",
-        mod_table_ui("table_edit")
+        mod_table_ui("editable")
       ),
 
       # Analytics tab
