@@ -1,0 +1,69 @@
+┌─────────────────────────────────────────────────────────────────────┐
+│                    USER OPENS APPLICATION                          │
+└────────────────────────────┬────────────────────────────────────────┘
+                             │
+                             ▼
+        ┌────────────────────────────────────────┐
+        │   Shiny App Starts (run_app.R)         │
+        │   ├─ UI Layer (app_ui.R)               │
+        │   └─ Server Layer (app_server.R)       │
+        └────────────────────┬───────────────────┘
+                             │
+                             ▼
+        ┌────────────────────────────────────────┐
+        │  DataStore Initialized                 │
+        │  ├─ Connect to DuckDB Database         │
+        │  │  (mtcars.duckdb)                    │
+        │  ├─ Load mtcars Table (in R memory)    │
+        │  └─ Create Active & Original Data Copy │
+        └────────────────────┬───────────────────┘
+                             │
+                             ▼
+        ┌────────────────────────────────────────┐
+        │  Home Tab Displayed                    │
+        │  ├─ Title & Instructions               │
+        │  ├─ Action Buttons (Save/Revert)       │
+        │  ├─ Download Button                    │
+        │  ├─ Rows Per Page Selector (Pagination)│
+        │  └─ Editable Data Table (Handsontable) │
+        └────────────────────┬───────────────────┘
+                             │
+        ┌────────────────────┴────────────────────┐
+        │                                         │
+        ▼                                         ▼
+   USER EDITS                               USER CLICKS BUTTON
+   TABLE CELLS                              
+   │                                             │
+   ├─ Cell Click ─────┐                        ├─ SAVE CHANGES
+   ├─ Type Value ─────┤                        │  └─ DataStore.update_cell()
+   └─ Edit Complete ──┤                        │     └─ Persist to DuckDB
+                      ▼                        │     └─ Update current data
+            Edit Detected by                   │     └─ Show Success Message
+            Hotwidget (JS)                     │
+            │                                  │
+            ▼                                  └─ REVERT CHANGES
+            Send Edit Data to Shiny            │  └─ DataStore.revert()
+            │                                  │     └─ Restore original data
+            ▼                                  │     └─ Show Revert Message
+            mod_table_server processes         │
+            │                                  └─ DOWNLOAD DATA
+            ▼                                  │  └─ Generate CSV file
+            Store in Reactive Value            │     └─ Download to computer
+            (last_edit)                        │
+            │                                  ▼
+            ▼                          UI Updates with
+            App observes change        New Data/Status
+            │
+            ▼
+            Show Edit Notification
+            ("Main app saw edit...")
+            │
+            ▼
+        ┌────────────────────────────────────────┐
+        │  Table Re-renders with Changes         │
+        │  ├─ Current Row Highlighted            │
+        │  └─ Data Updated in Widget             │
+        └────────────────────┬───────────────────┘
+                             │
+                             ▼
+                    READY FOR NEXT EDIT
